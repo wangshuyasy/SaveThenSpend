@@ -11,6 +11,8 @@ SaveThenSpend is a financial planning simulator designed for individuals who wan
 
 The target audience includes any individual who is interested in financial independence or early retirement (FIRE). The tool hopes to encourage realistic financial planning, promote healthy saving habits, and awareness of financial sustainability.
 
+### Try it out! It is live at [savethenspend.streamlit.app](https://savethenspend.streamlit.app)
+
 ## Features
 
 - Savings simulation with compound interest

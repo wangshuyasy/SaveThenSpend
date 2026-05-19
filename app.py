@@ -173,6 +173,14 @@ if enable_retirement:
             step=100.0,
         )
 
+        inflation_rate = st.number_input(
+            "Annual inflation rate (%)",
+            min_value=0.0,
+            max_value=20.0,
+            value=2.5,
+            step=0.1,
+        )
+
     with col3:
         spending_frequency = st.selectbox(
             "Spending frequency",
@@ -192,6 +200,7 @@ if enable_retirement:
         annual_interest_rate=retirement_interest_rate,
         regular_spending=regular_spending,
         spending_frequency=spending_frequency,
+        annual_inflation_rate=inflation_rate,
         max_months=int(retirement_max_months),
     )
 
@@ -205,8 +214,11 @@ st.subheader("Summary")
 col1, col2, col3, col4 = st.columns(4)
 
 col1.metric("Final balance", f"${summary['final_balance']:,.2f}")
-col2.metric("Total months", f"{summary['total_months']}")
-col3.metric("Total years", f"{summary['total_years']}")
+col2.metric("Years spent saving", f"{summary['years_spent_saving']}")
+col3.metric(
+    "Retirement years supported",
+    f"{summary['retirement_years_supported']}",
+)
 col4.metric("Status", str(summary["status"]))
 
 

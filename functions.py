@@ -135,6 +135,7 @@ def simulate_retirement_phase(
     annual_interest_rate: float,
     regular_spending: float,
     spending_frequency: Frequency,
+    annual_inflation_rate: float,
     max_months: int,
 ) -> pd.DataFrame:
     """
@@ -161,6 +162,7 @@ def simulate_retirement_phase(
 
     monthly_interest_rate = annual_interest_rate / 100 / 12
     monthly_spending = convert_to_monthly_amount(regular_spending, spending_frequency)
+    monthly_inflation_rate = annual_inflation_rate / 100 / 12
 
     balance = starting_balance
     records = []
@@ -169,7 +171,10 @@ def simulate_retirement_phase(
         starting_month_balance = balance
         interest = balance * monthly_interest_rate
         balance += interest
-        balance -= monthly_spending
+        inflation_adjusted_spending = monthly_spending * (
+            (1 + monthly_inflation_rate) ** (month - 1)
+        )
+        balance -= inflation_adjusted_spending
 
         if balance < 0:
             balance = 0
@@ -182,7 +187,7 @@ def simulate_retirement_phase(
                 "interest": round(interest, 2),
                 "contribution": 0.0,
                 "expense": 0.0,
-                "spending": round(monthly_spending, 2),
+                "spending": round(inflation_adjusted_spending, 2),
                 "ending_balance": round(balance, 2),
             }
         )
@@ -241,14 +246,21 @@ def generate_summary(timeline_df: pd.DataFrame) -> dict[str, float | int | str]:
         return {
             "final_balance": 0.0,
             "total_months": 0,
-            "total_years": 0.0,
+            "retirement_months_supported": 0,
+            "retirement_years_supported": 0.0,
             "lowest_balance": 0.0,
             "highest_balance": 0.0,
             "status": "No simulation generated",
         }
 
     final_balance = float(timeline_df["ending_balance"].iloc[-1])
-    total_months = int(timeline_df["month"].iloc[-1])
+    savings_df = timeline_df[timeline_df["phase"] == "Savings"]
+    savings_months = len(savings_df)
+    savings_years = savings_months / 12
+
+    retirement_df = timeline_df[timeline_df["phase"] == "Retirement"]
+    retirement_months_supported = len(retirement_df)
+    retirement_years_supported = retirement_months_supported / 12
 
     status = "Positive"
     if final_balance <= 0:
@@ -256,8 +268,8 @@ def generate_summary(timeline_df: pd.DataFrame) -> dict[str, float | int | str]:
 
     return {
         "final_balance": round(final_balance, 2),
-        "total_months": total_months,
-        "total_years": round(total_months / 12, 2),
+        "years_spent_saving": round(savings_years, 2),
+        "retirement_years_supported": round(retirement_years_supported, 2),
         "lowest_balance": round(float(timeline_df["ending_balance"].min()), 2),
         "highest_balance": round(float(timeline_df["ending_balance"].max()), 2),
         "status": status,

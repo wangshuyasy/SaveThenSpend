@@ -195,14 +195,20 @@ if enable_retirement:
             step=12,
         )
 
-    retirement_df = simulate_retirement_phase(
-        starting_balance=retirement_starting_balance,
-        annual_interest_rate=retirement_interest_rate,
-        regular_spending=regular_spending,
-        spending_frequency=spending_frequency,
-        annual_inflation_rate=inflation_rate,
-        max_months=int(retirement_max_months),
-    )
+    if use_savings_for_retirement and enable_savings and final_savings_balance <= 0:
+        st.warning(
+            "Savings balance is zero or negative, so retirement simulation cannot start from savings result."
+        )
+        retirement_df = None
+    else:
+        retirement_df = simulate_retirement_phase(
+            starting_balance=retirement_starting_balance,
+            annual_interest_rate=retirement_interest_rate,
+            regular_spending=regular_spending,
+            spending_frequency=spending_frequency,
+            annual_inflation_rate=inflation_rate,
+            max_months=int(retirement_max_months),
+        )
 
 
 timeline_df = combine_timelines(savings_df, retirement_df)
